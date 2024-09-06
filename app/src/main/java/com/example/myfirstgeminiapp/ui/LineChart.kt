@@ -46,30 +46,20 @@ fun AreaChart(data: List<Pair<LocalDate, Float>>) {
     val dateFormatter = DateTimeFormatter.ofPattern("MM-dd")
     val maxValue = data.maxOf { it.second }
     val minValue = data.minOf { it.second }
-    val middleIndex = data.size / 2
     val step = (maxValue - minValue) / 7  // 8 steps mean 7 intervals
+    val adjustedMaxValue = maxValue + 2 * step  // Adjust max value to be 2 steps higher
+    val yAxisPadding = 20f  // Padding between the path and y-axis labels
 
     Canvas(modifier = Modifier.fillMaxWidth().height(200.dp)) {
         val width = size.width
         val height = size.height
-        val spacing = width / (data.size - 1)
+        val spacing = width / data.size  // Adjust spacing to prevent crossing the edge
 
         val path1 = Path().apply {
             moveTo(0f, height)
-            data.subList(0, middleIndex + 1).forEachIndexed { index, pair ->
+            data.forEachIndexed { index, pair ->
                 val x = index * spacing
-                val y = height - (pair.second - minValue) / (maxValue - minValue) * height
-                lineTo(x, y)
-            }
-            lineTo(middleIndex * spacing, height)
-            close()
-        }
-
-        val path2 = Path().apply {
-            moveTo(middleIndex * spacing, height)
-            data.subList(middleIndex, data.size).forEachIndexed { index, pair ->
-                val x = (middleIndex + index) * spacing
-                val y = height - (pair.second - minValue) / (maxValue - minValue) * height
+                val y = height - (pair.second - minValue) / (adjustedMaxValue - minValue) * height
                 lineTo(x, y)
             }
             lineTo(width, height)
@@ -82,16 +72,10 @@ fun AreaChart(data: List<Pair<LocalDate, Float>>) {
             style = Fill
         )
 
-        drawPath(
-            path = path2,
-            color = Color.DarkGray,
-            style = Fill
-        )
-
         // Draw horizontal grid lines and y-axis labels on the right side
         for (i in 0..7) {
             val value = minValue + i * step
-            val y = height - (value - minValue) / (maxValue - minValue) * height
+            val y = height - (value - minValue) / (adjustedMaxValue - minValue) * height
             drawLine(
                 color = Color.Gray,
                 start = Offset(0f, y),
@@ -100,7 +84,7 @@ fun AreaChart(data: List<Pair<LocalDate, Float>>) {
             )
             drawContext.canvas.nativeCanvas.drawText(
                 value.toString(),
-                width + 10f,  // Move y-axis labels to the right side
+                width + yAxisPadding,  // Add padding to the y-axis labels
                 y,
                 android.graphics.Paint().apply {
                     color = android.graphics.Color.BLACK
