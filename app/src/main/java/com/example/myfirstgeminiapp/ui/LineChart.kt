@@ -54,13 +54,29 @@ fun AreaChart(data: List<Pair<LocalDate, Float>>) {
         val width = size.width
         val height = size.height
         val spacing = width / data.size  // Adjust spacing to prevent crossing the edge
+        val firstPathWidth = width * 0.3f  // 30% of the total width
 
         val path1 = Path().apply {
             moveTo(0f, height)
             data.forEachIndexed { index, pair ->
                 val x = index * spacing
-                val y = height - (pair.second - minValue) / (adjustedMaxValue - minValue) * height
-                lineTo(x, y)
+                if (x <= firstPathWidth) {
+                    val y = height - (pair.second - minValue) / (adjustedMaxValue - minValue) * height
+                    lineTo(x, y)
+                }
+            }
+            lineTo(firstPathWidth, height)
+            close()
+        }
+
+        val path2 = Path().apply {
+            moveTo(firstPathWidth, height)
+            data.forEachIndexed { index, pair ->
+                val x = index * spacing
+                if (x > firstPathWidth) {
+                    val y = height - (pair.second - minValue) / (adjustedMaxValue - minValue) * height
+                    lineTo(x, y)
+                }
             }
             lineTo(width, height)
             close()
@@ -69,6 +85,12 @@ fun AreaChart(data: List<Pair<LocalDate, Float>>) {
         drawPath(
             path = path1,
             color = Color.LightGray,
+            style = Fill
+        )
+
+        drawPath(
+            path = path2,
+            color = Color.DarkGray,
             style = Fill
         )
 
