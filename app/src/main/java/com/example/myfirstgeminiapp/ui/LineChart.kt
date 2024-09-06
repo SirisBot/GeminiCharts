@@ -47,6 +47,7 @@ fun AreaChart(data: List<Pair<LocalDate, Float>>) {
     val maxValue = data.maxOf { it.second }
     val minValue = data.minOf { it.second }
     val middleIndex = data.size / 2
+    val step = (maxValue - minValue) / 7  // 8 steps mean 7 intervals
 
     Canvas(modifier = Modifier.fillMaxWidth().height(200.dp)) {
         val width = size.width
@@ -88,8 +89,8 @@ fun AreaChart(data: List<Pair<LocalDate, Float>>) {
         )
 
         // Draw horizontal grid lines and y-axis labels on the right side
-        val yAxisLabels = listOf(minValue, (minValue + maxValue) / 2, maxValue)
-        yAxisLabels.forEachIndexed { index, value ->
+        for (i in 0..7) {
+            val value = minValue + i * step
             val y = height - (value - minValue) / (maxValue - minValue) * height
             drawLine(
                 color = Color.Gray,
